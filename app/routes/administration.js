@@ -26,8 +26,23 @@ var post = function post(req, res) {
   });
 };
 
+var postReboot = function post(req, res) {
+  var express = require('express');
+  const exec = require('child_process').exec;
+  const child = exec('reboot',
+      (error, stdout, stderr) => {
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+          if (error !== null) {
+              console.log(`exec error: ${error}`);
+          }
+  });
+  res.end();
+};
+
 router.get('/', get);
 router.post('/', post);
+router.post('/reboot', postReboot);
 
 module.exports = {
   router: router
