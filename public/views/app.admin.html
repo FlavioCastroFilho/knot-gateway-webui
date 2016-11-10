@@ -9,3 +9,23 @@
     <button class="btn btn-lg btn-primary btn-block" type="submit" ngClick="Submit">Apply</button>
   </form>
 </div>
+
+<div class="jumbotron reset" style="margin-top: 3%;">
+<form class="form-reboot" ng-submit="reboot()">
+  <button class="btn btn-lg btn-primary btn-block" ngClick="Submit">Reboot</button>
+</form>
+  <table style="width:100%; border: 0px;" align="center">
+    <tr style="background: none;">
+    <td style="width:20%; border: 0px; padding: 0%;" align="center">
+      <form class="form-restore" ng-submit="restore()">
+      <button class="btn btn-lg btn-primary btn-block" ngClick="Submit" style="width: 100%; padding: 5%;">Restore</button>
+      </form>
+    </td>
+    <td style="width:80%; border: 0px; padding: 3%;" align="left">
+      <p>
+        Restore KNoT Gateway settings to the original defaults.
+      </p>
+    </td>
+    </tr>
+  </table>
+</div>
