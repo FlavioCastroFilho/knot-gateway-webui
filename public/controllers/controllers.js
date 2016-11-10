@@ -11,7 +11,7 @@ app.controller('SigninController', function ($scope, $state, SigninService) {
   };
 });
 
-app.controller('AdminController', function ($rootScope, $scope, $location, AppService) {
+app.controller('AdminController', function ($rootScope, $scope, $location, $state, AppService) {
   var formData = {
     password: null,
     passwordConfirmation: null,
@@ -54,6 +54,15 @@ app.controller('AdminController', function ($rootScope, $scope, $location, AppSe
       }, function onError(err) {
         alert(err);
       });
+  };
+
+  $scope.reboot = function () {
+    AppService.reboot()
+    .then(function onSuccess(/* result */) {
+      $state.go('app.reboot');
+    }, function onError(err) {
+      alert(err);
+    });
   };
 });
 
@@ -151,6 +160,21 @@ app.controller('DevicesController', function ($rootScope, $scope, $location, App
   };
 });
 
+app.controller('RebootController', function ($scope, $location, $interval, $state, AppService) {
+  $scope.progress = function () {
+    var MINUTE = 60000;
+    $scope.countup = 0;
+    var onInterval = $interval(function requestAnimationFrame() {
+      if ($scope.countup >= 100) {
+        $interval.cancel(onInterval);
+        $state.go('app.admin');
+      } else {
+        $scope.countup++;
+      }
+    }, MINUTE / 100);
+  };
+});
+
 app.controller('MainController', function ($rootScope, $location) {
   $rootScope.activetab = $location.path();
 });
@@ -162,4 +186,3 @@ app.controller('RadioController', function ($rootScope, $location) {
 app.controller('CloudController', function ($rootScope, $location) {
   $rootScope.activetab = $location.path();
 });
-
