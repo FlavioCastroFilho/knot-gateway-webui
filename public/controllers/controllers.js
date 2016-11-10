@@ -55,6 +55,41 @@ app.controller('AdminController', function ($rootScope, $scope, $location, AppSe
         alert(err);
       });
   };
+
+  $scope.reboot = function () {
+    if (confirm("Click the button okay to reboot the router.") === true) {
+      AppService.reboot()
+      .then(function onSuccess(result) {
+        var url = $location.url('/process/reboot').absUrl();
+        window.location = url;
+      }, function onError(err) {
+        alert(err);
+      });
+    } else {
+      /*do nothing*/
+    }
+  };
+
+  $scope.restore = function () {
+        alert('Restore');
+  };
+
+  $scope.progress = function () {
+    var elem = document.getElementById("myBar");
+    var width = 0;
+    var id = setInterval(frame, 600);
+    function frame() {
+      if (width >= 100) {
+        clearInterval(id);
+        var url = $location.url('/').absUrl();
+        window.location = url;
+      } else {
+        width++;
+        elem.style.width = width + '%';
+        document.getElementById("demo").innerHTML = width * 1  + '%';
+      }
+    }
+  };
 });
 
 app.controller('NetworkController', function ($rootScope, $scope, $location, AppService) {
