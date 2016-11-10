@@ -11,7 +11,7 @@ app.controller('SigninController', function ($scope, $state, SigninService) {
   };
 });
 
-app.controller('AdminController', function ($rootScope, $scope, $location, AppService) {
+app.controller('AdminController', function ($rootScope, $scope, $location, $interval, AppService) {
   var formData = {
     password: null,
     passwordConfirmation: null,
@@ -54,6 +54,41 @@ app.controller('AdminController', function ($rootScope, $scope, $location, AppSe
       }, function onError(err) {
         alert(err);
       });
+  };
+
+  $scope.reboot = function () {
+    AppService.reboot()
+    .then(function onSuccess(result) {
+      var url = $location.url('/reboot').absUrl();
+      window.location = url;
+    }, function onError(err) {
+      alert(err);
+    });
+  };
+
+  $scope.restore = function () {
+        alert('Restore');
+  };
+
+  $scope.progress = function () {
+    var value = 0;
+    var promise;
+
+    $scope.max = 100;
+    $scope.dynamic = 0;
+
+    promise = $interval(frame, 600);
+
+    function frame() {
+      if (value >= 100) {;
+        var url = $location.url('/').absUrl();
+        $interval.cancel(promise);
+        window.location = url;
+      } else {
+        value++;
+        $scope.dynamic = value;
+      }
+    }
   };
 });
 
@@ -163,3 +198,19 @@ app.controller('CloudController', function ($rootScope, $location) {
   $rootScope.activetab = $location.path();
 });
 
+app.directive('ngConfirmClick', [
+        function(){
+            return {
+                priority: 1,
+                terminal: true,
+                link: function (scope, element, attr) {
+                    var msg = attr.ngConfirmClick || "Are you sure?";
+                    var clickAction = attr.ngClick;
+                    element.bind('click',function (event) {
+                        if ( window.confirm(msg) ) {
+                            scope.$eval(clickAction)
+                        }
+                    });
+                }
+            };
+    }]);
