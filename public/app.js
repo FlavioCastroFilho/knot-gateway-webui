@@ -1,6 +1,6 @@
 /*global angular*/
 
-var app = angular.module('app', ['ui.router', 'ngMask']);
+var app = angular.module('app', ['ui.router', 'ngMask', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 app.config(function ($stateProvider, $urlRouterProvider) {
   $stateProvider
