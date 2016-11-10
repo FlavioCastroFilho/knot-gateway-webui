@@ -32,6 +32,11 @@ app.config(function ($stateProvider, $urlRouterProvider) {
       url: '/devices',
       templateUrl: 'views/app.devices.html',
       controller: 'DevicesController'
+    })
+    .state('app.reboot', {
+      url: '/reboot',
+      templateUrl: 'views/app.reboot.html',
+      controller: 'AdminController'
     });
 
   $urlRouterProvider.otherwise('signin');
