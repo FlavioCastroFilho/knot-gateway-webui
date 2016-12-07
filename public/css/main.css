@@ -269,6 +269,10 @@ a:focus {
   margin-top: 5px;
 }
 
+.form-cloud input {
+  width: auto;
+}
+
 .signin-container {
   width: 540px;
   padding: 30px;

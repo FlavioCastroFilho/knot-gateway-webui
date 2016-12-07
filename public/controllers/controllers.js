@@ -221,6 +221,41 @@ app.controller('RadioController', function ($rootScope, $scope, $location, AppSe
   };
 });
 
-app.controller('CloudController', function ($rootScope, $location) {
+app.controller('CloudController', function ($rootScope, $scope, $location, AppService) {
+  var formData = {
+    ip: null,
+    port: null,
+    uuid: null,
+    token: null
+  };
+
   $rootScope.activetab = $location.path();
+
+  $scope.init = function () {
+    AppService.loadCloudInfo()
+      .then(function onSuccess(result) {
+        formData.ip = result.ip;
+        formData.port = result.port;
+        formData.uuid = result.uuid;
+        formData.token = result.token;
+      }, function onError(err) {
+        console.log(err);
+      });
+
+    $scope.form = formData;
+  };
+
+  $scope.save = function () {
+    var config = {
+      ip: $scope.form.ip,
+      port: $scope.form.port
+    };
+
+    AppService.saveCloudInfo(config)
+      .then(function onSuccess(/* result */) {
+        alert('Information saved');
+      }, function onError(err) {
+        alert(err);
+      });
+  };
 });
