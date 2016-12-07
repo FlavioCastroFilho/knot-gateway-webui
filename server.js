@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
+var cloudRoute = require('./app/routes/cloud');
 var authRoute = require('./app/routes/auth');
 var admRoute = require('./app/routes/administration');
 var networkRoute = require('./app/routes/network');
@@ -21,6 +22,7 @@ serverConfig.use(bodyParser.urlencoded({ extended: true }));
 serverConfig.use(express.static(publicRoot));
 serverConfig.use(errorHandler);
 
+serverConfig.use('/api/cloud', cloudRoute.router);
 serverConfig.use('/api/auth', authRoute.router);
 serverConfig.use('/api/administration', admRoute.router);
 serverConfig.use('/api/network', networkRoute.router);

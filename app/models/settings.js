@@ -1,4 +1,6 @@
 var fs = require('fs');
+var database = require('./../database');
+var os = require('os');
 
 var CONFIGURATION_FILE = require('../config').CONFIGURATION_FILE;
 
@@ -41,6 +43,38 @@ var writeFile = function writeFile(type, incomingData, done) {
         localData.network.defaultGateway = '';
         localData.network.networkMask = '';
       }
+    } else if (type === 'cloud') {
+      database.configuration.find(function (error, docs) {
+        var configurationCollection = docs;
+        var address;
+        var interfaces;
+
+        for (interfaces in os.networkInterfaces()) {
+          if (!os.networkInterfaces()[interfaces][0].internal) {
+            address = os.networkInterfaces()[interfaces][0].address;
+          }
+        }
+
+        if (configurationCollection[0] !== undefined) {
+          database.configuration.update({ host_name: os.hostname() },
+            { $set: {
+              parent_ip: incomingData.ip,
+              parent_port: incomingData.port,
+              local_ip: address
+            } }, { multi: true }, function () {
+              // the update is complete
+            });
+        } else {
+          database.configuration.save({
+            host_name: os.hostname(),
+            local_ip: address,
+            local_port: 3000,
+            parent_ip: incomingData.ip,
+            parent_port: incomingData.port
+          });
+        }
+        return docs;
+      });
     }
 
     fs.writeFile(CONFIGURATION_FILE, JSON.stringify(localData), 'utf8', done);
@@ -123,11 +157,58 @@ var setNetworkSettings = function setNetworkSettings(settings, done) {
   writeFile('net', settings, done);
 };
 
+var getCloudSettings = function getCloudSettings(done) {
+  database.configuration.find(function (err, docs) {
+    var configurationCollection = docs;
+
+    fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(error, data) {
+      var localData;
+      var radioObj;
+
+      if (err) {
+        done(err);
+      } else {
+        try {
+          localData = JSON.parse(data);
+          if (configurationCollection[0] !== undefined) {
+            radioObj = {
+              ip: configurationCollection[0].parent_ip,
+              port: configurationCollection[0].parent_port,
+              uuid: configurationCollection[0].uuid,
+              token: configurationCollection[0].token
+            };
+            localData.cloud.uuid = configurationCollection[0].uuid;
+            localData.cloud.token = configurationCollection[0].token;
+            fs.writeFile(CONFIGURATION_FILE, JSON.stringify(localData), 'utf8');
+          } else {
+            radioObj = {
+              ip: null,
+              port: null,
+              uuid: null,
+              token: null
+            };
+          }
+          done(null, radioObj);
+        } catch (e) {
+          done(e);
+        }
+      }
+    });
+    return docs;
+  });
+};
+
+var setCloudSettings = function setCloudSettings(settings, done) {
+  writeFile('cloud', settings, done);
+};
+
 module.exports = {
   getAdministrationSettings: getAdministrationSettings,
   setAdministrationSettings: setAdministrationSettings,
   getRadioSettings: getRadioSettings,
   setRadioSettings: setRadioSettings,
   getNetworkSettings: getNetworkSettings,
-  setNetworkSettings: setNetworkSettings
+  setNetworkSettings: setNetworkSettings,
+  getCloudSettings: getCloudSettings,
+  setCloudSettings: setCloudSettings
 };
