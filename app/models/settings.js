@@ -47,21 +47,25 @@ var writeFile = function writeFile(type, incomingData, done) {
       database.configuration.find(function (error, docs) {
         var configurationCollection = docs;
         var address;
-        var interfaces;
+        var interfaceNames;
+        var networkInterfaces = os.networkInterfaces();
 
-        for (interfaces in os.networkInterfaces()) {
-          if (!os.networkInterfaces()[interfaces][0].internal) {
-            address = os.networkInterfaces()[interfaces][0].address;
+        for (interfaceNames in networkInterfaces) { // eslint-disable no-restricted-syntax
+          if (!networkInterfaces[interfaceNames][0].internal) {
+            address = networkInterfaces[interfaceNames][0].address;
+            break;
           }
         }
 
-        if (configurationCollection[0] !== undefined) {
+        if (configurationCollection[0]) {
           database.configuration.update({ host_name: os.hostname() },
-            { $set: {
-              parent_ip: incomingData.ip,
-              parent_port: incomingData.port,
-              local_ip: address
-            } }, { multi: true }, function () {
+            {
+              $set: {
+                parent_ip: incomingData.ip,
+                parent_port: incomingData.port,
+                local_ip: address
+              }
+            }, { multi: true }, function () {
               // the update is complete
             });
         } else {
