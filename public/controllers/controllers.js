@@ -1,4 +1,6 @@
 /*global app*/
+var changeScope = false;
+var gatewayIp = null;
 
 app.controller('SigninController', function ($scope, $state, SigninService) {
   $scope.signin = function signin() {
@@ -79,28 +81,40 @@ app.controller('AdminController', function ($rootScope, $scope, $location, $stat
   };
 });
 
-app.controller('NetworkController', function ($rootScope, $scope, $location, AppService) {
+app.controller('NetworkController', function ($rootScope, $scope, $location, $state, AppService) {
   var networkData = {
+    hostname: null,
     ipaddress: null,
     networkMask: null,
-    defaultGateway: null
+    defaultGateway: null,
+    primarydns: null,
+    secondarydns: null
   };
 
   $rootScope.activetab = $location.path();
 
-  $scope.readonly = true;
+  $scope.readonlyip = true;
+  $scope.readonlydns = true;
 
   $scope.$watch('automaticIp', function (/* value */) {
-    $scope.readonly = ($scope.automaticIp === 'true');
+    $scope.readonlyip = ($scope.automaticIp === 'true');
+  });
+
+  $scope.$watch('automaticDns', function (/* value */) {
+    $scope.readonlydns = ($scope.automaticDns === 'true');
   });
 
   $scope.init = function () {
     AppService.loadNetworkInfo()
       .then(function onSuccess(result) {
+        networkData.hostname = result.hostname !== '' ? result.hostname : null;
         networkData.ipaddress = result.ipaddress !== '' ? result.ipaddress : null;
         networkData.networkMask = result.networkMask !== '' ? result.networkMask : null;
         networkData.defaultGateway = result.defaultGateway !== '' ? result.defaultGateway : null;
         $scope.automaticIp = result.automaticIp ? 'true' : 'false';
+        networkData.primarydns = result.primarydns !== '' ? result.primarydns : null;
+        networkData.secondarydns = result.secondarydns !== '' ? result.secondarydns : null;
+        $scope.automaticDns = result.automaticDns ? 'true' : 'false';
       }, function onError(err) {
         console.log(err);
       });
@@ -110,6 +124,7 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, App
 
   $scope.save = function () {
     var networkConfig = {
+      hostname: $scope.form.hostname,
       ipaddress: $scope.form.ipaddress,
       networkMask: $scope.form.networkMask,
       defaultGateway: $scope.form.defaultGateway,
@@ -117,8 +132,11 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, App
     };
 
     AppService.saveNetworkInfo(networkConfig)
-      .then(function onSuccess(/* result */) {
-        alert('Network Information saved');
+      .then(function onSuccess(result) {
+        console.log(result);
+        gatewayIp = result.data.gatewayIp;
+        changeScope = true;
+        $state.go('app.reboot');
       }, function error(err) {
         alert(err);
       });
@@ -173,7 +191,7 @@ app.controller('DevicesController', function ($rootScope, $scope, $location, App
   };
 });
 
-app.controller('RebootController', function ($scope, $location, $interval, $state) {
+app.controller('RebootController', function ($scope, $location, $interval, $state, $window) {
   $scope.progress = function progress() {
     var promise;
     var MINUTE = 60000;
@@ -181,7 +199,13 @@ app.controller('RebootController', function ($scope, $location, $interval, $stat
     promise = $interval(function onInterval() {
       if ($scope.countup >= 100) {
         $interval.cancel(promise);
-        $state.go('app.admin');
+        if (changeScope) {
+          changeScope = false;
+          console.log('http://' + gatewayIp + ':8080');
+          $window.location.href = 'http://' + gatewayIp + ':8080';
+        } else {
+          $state.go('app.admin');
+        }
       } else {
         $scope.countup += 1;
       }
