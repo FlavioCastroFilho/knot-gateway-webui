@@ -53,5 +53,6 @@ router.post('/reboot', postReboot);
 router.post('/restore', postRestore);
 
 module.exports = {
-  router: router
+  router: router,
+  postReboot: postReboot
 };
