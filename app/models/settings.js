@@ -1,4 +1,5 @@
 var fs = require('fs');
+var exec = require('child_process').exec;
 
 var CONFIGURATION_FILE = require('../config').CONFIGURATION_FILE;
 var DEFAULT_CONFIGURATION_FILE = require('../config/gatewayFactoryConfig.json');
@@ -7,6 +8,7 @@ var DEVICES_FILE = require('../config').DEVICES_FILE;
 var writeFile = function writeFile(type, incomingData, done) {
   fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
     var localData;
+    var cmd;
 
     if (err) {
       done(err);
@@ -32,6 +34,14 @@ var writeFile = function writeFile(type, incomingData, done) {
       localData.radio.channel = incomingData.channel;
       localData.radio.TxPower = incomingData.TxPower;
     } else if (type === 'net') {
+      cmd = 'echo ' + incomingData.hostname + '> /etc/hostname';
+      exec(cmd, function hostname(error) {
+        if (error !== null) {
+          console.log(error);
+        }
+      });
+      localData.network.hostname = incomingData.hostname;
+
       localData.network.automaticIp = incomingData.automaticIp;
 
       if (!incomingData.automaticIp) {
