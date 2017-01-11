@@ -21,6 +21,9 @@ app.factory('SigninService', function ($http) {
 
 app.factory('AppService', function ($http) {
   var factory = {};
+  /* eslint-disable no-unused-vars */
+  var gatewayIp;
+  /* eslint-disable no-unused-vars */
 
   factory.saveAdmInfo = function saveAdmInfo(info) {
     return $http({
