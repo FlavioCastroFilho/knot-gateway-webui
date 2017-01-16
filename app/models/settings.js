@@ -141,6 +141,15 @@ var setNetworkSettings = function setNetworkSettings(settings, done) {
 
 var setDefaultSettings = function setDefaultSettings(done) {
   var keys = { keys: [] };
+  var cmd;
+
+  cmd = 'echo "knot" > /etc/hostname';
+  exec(cmd, function hostname(error) {
+    if (error !== null) {
+      console.log(error);
+    }
+  });
+
   fs.writeFile(DEVICES_FILE, JSON.stringify(keys), 'utf8', null);
 
   fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {

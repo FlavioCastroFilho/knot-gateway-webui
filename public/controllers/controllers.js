@@ -73,7 +73,9 @@ app.controller('AdminController', function ($rootScope, $scope, $location, $stat
 
   $scope.restore = function restore() {
     AppService.restore()
-    .then(function onSuccess(/* result */) {
+    .then(function onSuccess(result) {
+      gatewayIp = result.data.gatewayIp;
+      changeScope = true;
       $state.go('app.reboot');
     }, function onError() {
       alert('Failed to restore the gateway');
