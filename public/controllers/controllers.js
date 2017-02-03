@@ -97,11 +97,15 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, $st
   $scope.readonlydns = true;
 
   $scope.$watch('automaticIp', function (/* value */) {
+    /*
     $scope.readonlyip = ($scope.automaticIp === 'true');
+    */
   });
 
   $scope.$watch('automaticDns', function (/* value */) {
+    /*
     $scope.readonlydns = ($scope.automaticDns === 'true');
+    */
   });
 
   $scope.init = function () {
