@@ -28,7 +28,7 @@ var post = function post(req, res) {
   });
 };
 
-var postReboot = function postReboot(req, res) {
+var postReboot = function postReboot(req, res, ip) {
   var json = [];
   var address;
   var interfaces;
@@ -38,17 +38,23 @@ var postReboot = function postReboot(req, res) {
     if (error !== null) {
       res.sendStatus(500);
     } else {
-     /* eslint-disable no-restricted-syntax */
-      for (interfaces in networkInterfaces) {
-        if (!networkInterfaces[interfaces][0].internal) {
-          address = networkInterfaces[interfaces][0].address;
+      if (ip === null) {
+        /* eslint-disable no-restricted-syntax */
+        for (interfaces in networkInterfaces) {
+          if (!networkInterfaces[interfaces][0].internal) {
+            address = networkInterfaces[interfaces][0].address;
+          }
         }
-      }
-      /* eslint-disable no-restricted-syntax */
+        /* eslint-disable no-restricted-syntax */
 
-      json = {
-        gatewayIp: address
-      };
+        json = {
+          gatewayIp: address
+        };
+      } else {
+        json = {
+          gatewayIp: ip
+        };
+      }
 
       res.json(json);
     }

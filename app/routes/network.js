@@ -22,7 +22,13 @@ var post = function post(req, res) {
     if (err) {
       res.sendStatus(500);
     } else {
-      administration.postReboot(req, res);
+      /* eslint-disable no-lonely-if */
+      if (!req.body.automaticIp) {
+        administration.postReboot(req, res, req.body.ipaddress);
+      } else {
+        administration.postReboot(req, res);
+      }
+      /* eslint-disable no-lonely-if */
     }
   });
 };
