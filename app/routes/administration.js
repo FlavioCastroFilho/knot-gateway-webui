@@ -38,18 +38,23 @@ var postReboot = function postReboot(req, res) {
     if (error !== null) {
       res.sendStatus(500);
     } else {
-     /* eslint-disable no-restricted-syntax */
-      for (interfaces in networkInterfaces) {
-        if (!networkInterfaces[interfaces][0].internal) {
-          address = networkInterfaces[interfaces][0].address;
+      if (req.body.ipaddress === undefined) {
+        /* eslint-disable no-restricted-syntax */
+        for (interfaces in networkInterfaces) {
+          if (!networkInterfaces[interfaces][0].internal) {
+            address = networkInterfaces[interfaces][0].address;
+          }
         }
+        /* eslint-disable no-restricted-syntax */
+
+        json = {
+          gatewayIp: address
+        };
+      } else {
+        json = {
+          gatewayIp: req.body.ipaddress
+        };
       }
-      /* eslint-disable no-restricted-syntax */
-
-      json = {
-        gatewayIp: address
-      };
-
       res.json(json);
     }
   });

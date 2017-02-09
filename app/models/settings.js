@@ -1,5 +1,7 @@
 var fs = require('fs');
-var exec = require('child_process').exec;
+var dbus = require('dbus-native');
+var sysbus = dbus.systemBus();
+var connman = sysbus.getService('net.connman');
 
 var CONFIGURATION_FILE = require('../config').CONFIGURATION_FILE;
 var DEFAULT_CONFIGURATION_FILE = require('../config/gatewayFactoryConfig.json');
@@ -8,7 +10,6 @@ var DEVICES_FILE = require('../config').DEVICES_FILE;
 var writeFile = function writeFile(type, incomingData, done) {
   fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
     var localData;
-    var cmd;
 
     if (err) {
       done(err);
@@ -33,31 +34,6 @@ var writeFile = function writeFile(type, incomingData, done) {
     } else if (type === 'radio') {
       localData.radio.channel = incomingData.channel;
       localData.radio.TxPower = incomingData.TxPower;
-    } else if (type === 'net') {
-      cmd = 'echo ' + incomingData.hostname + ' > /etc/hostname';
-      exec(cmd, function hostname(error) {
-        if (error !== null) {
-          console.log(error);
-          done(error);
-        } else {
-          localData.network.hostname = incomingData.hostname;
-          localData.network.automaticIp = incomingData.automaticIp;
-
-          if (!incomingData.automaticIp) {
-            localData.network.ipaddress = incomingData.ipaddress;
-            localData.network.defaultGateway = incomingData.defaultGateway;
-            localData.network.networkMask = incomingData.networkMask;
-            localData.network.primaryDns = incomingData.primaryDns;
-            localData.network.secondaryDns = incomingData.secondaryDns;
-          } else {
-            localData.network.ipaddress = '';
-            localData.network.defaultGateway = '';
-            localData.network.networkMask = '';
-            localData.network.primaryDns = '';
-            localData.network.secondaryDns = '';
-          }
-        }
-      });
     }
     fs.writeFile(CONFIGURATION_FILE, JSON.stringify(localData), 'utf8', done);
   });
@@ -118,54 +94,69 @@ var setRadioSettings = function setRadioSettings(settings, done) {
   writeFile('radio', settings, done);
 };
 
-var getNetworkSettings = function getNetworkSettings(done) {
-  fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
-    var obj;
-
-    if (err) {
-      done(err);
-    } else {
-      try {
-        obj = JSON.parse(data);
-        fs.readFile('/etc/hostname', 'utf8', function onReadHostname(errHostname, dataHostname) {
-          if (errHostname) {
-            done(errHostname);
-            return;
-          }
-          obj.network.hostname = dataHostname;
-          done(null, obj.network);
-        });
-      } catch (e) {
-        done(e);
-      }
-    }
-  });
-};
-
-var setNetworkSettings = function setNetworkSettings(settings, done) {
-  writeFile('net', settings, done);
-};
-
 var setDefaultSettings = function setDefaultSettings(done) {
   var keys = { keys: [] };
+  var interface;
 
   fs.writeFile('/etc/hostname', 'knot', 'utf8', null);
-
   fs.writeFile(DEVICES_FILE, JSON.stringify(keys), 'utf8', null);
-
   fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
     var localData;
-
     if (err) {
       done(err);
       return;
     }
-
     localData = JSON.parse(data);
 
     DEFAULT_CONFIGURATION_FILE.radio.mac = localData.radio.mac;
+    connman.getInterface('/', 'net.connman.Manager', function (errConnman, nm) {
+      if (errConnman) {
+        done(errConnman);
+        return;
+      }
+      /* eslint-disable new-cap */
+      nm.GetServices(function (errServices, res) {
+        if (errServices) {
+          console.log(errServices);
+          done(errServices);
+          return;
+        }
 
-    fs.writeFile(CONFIGURATION_FILE, JSON.stringify(DEFAULT_CONFIGURATION_FILE), 'utf8', done);
+        interface = res[0][0];
+        connman.getInterface(interface, 'net.connman.Service', function (errInterface, iface) {
+          if (errInterface) {
+            console.log(errInterface);
+            done(errInterface);
+            return;
+          }
+          /* eslint-disable new-cap */
+          iface.SetProperty(
+            'IPv4.Configuration',
+            ['a{sv}',
+              [// a
+                [// {
+                  [// [0]
+                    'Method', // s
+                    ['s', 'dhcp'] // v
+                  ]
+                ]// }
+              ]
+            ],
+            function (errInterface2) {
+              if (errInterface2) {
+                console.log(errInterface2);
+                done(errInterface2);
+                return;
+              }
+              fs.writeFile(CONFIGURATION_FILE, JSON.stringify(DEFAULT_CONFIGURATION_FILE), 'utf8', done);
+              return;
+            }
+          );
+          /* eslint-disable new-cap */
+        });
+      });
+      /* eslint-disable new-cap */
+    });
   });
 };
 
@@ -174,7 +165,5 @@ module.exports = {
   setAdministrationSettings: setAdministrationSettings,
   getRadioSettings: getRadioSettings,
   setRadioSettings: setRadioSettings,
-  getNetworkSettings: getNetworkSettings,
-  setNetworkSettings: setNetworkSettings,
   setDefaultSettings: setDefaultSettings
 };

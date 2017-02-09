@@ -1,13 +1,22 @@
 var router = require('express').Router(); // eslint-disable-line new-cap
-var settings = require('../models/settings');
+var network = require('../models/network');
 var administration = require('./administration');
 
 var get = function get(req, res) {
-  settings.getNetworkSettings(function onNetworkSettingsReturned(err, netSettings) {
+  network.getHostname(function onHostnameReturned(err, hostname) {
     if (err) {
       res.sendStatus(500);
+      console.log(err);
     } else {
-      res.json(netSettings);
+      network.getIpv4Configuration(function onIpv4Configuration(errIpv4, networkObj) {
+        if (errIpv4) {
+          res.sendStatus(500);
+        } else {
+          networkObj.hostname = hostname;
+          networkObj.automaticDns = true;
+          res.json(networkObj);
+        }
+      });
     }
   });
 };
@@ -18,11 +27,17 @@ var post = function post(req, res) {
     return;
   }
 
-  settings.setNetworkSettings(req.body, function onNetworkSettingsSet(err) {
+  network.setHostname(req.body.hostname, function onHostnameSet(err) {
     if (err) {
       res.sendStatus(500);
     } else {
-      administration.postReboot(req, res);
+      network.setIpv4Configuration(req.body, function onIpv4Set(errIpv4) {
+        if (errIpv4) {
+          res.sendStatus(500);
+        } else {
+          administration.postReboot(req, res);
+        }
+      });
     }
   });
 };
