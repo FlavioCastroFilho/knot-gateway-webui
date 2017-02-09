@@ -71,13 +71,9 @@ app.controller('AdminController', function ($rootScope, $scope, $location, $stat
   };
 
   $scope.restore = function restore() {
-    AppService.restore()
-    .then(function onSuccess(result) {
-      AppService.gatewayIp = result.data.gatewayIp;
-      $state.go('app.reboot');
-    }, function onError() {
-      alert('Failed to restore the gateway');
-    });
+    AppService.restore();
+    AppService.gatewayIp = 'knot.local';
+    $state.go('app.reboot');
   };
 });
 
@@ -115,16 +111,16 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, $st
 
   $scope.save = function () {
     var networkConfig = {
+      ipaddress: $scope.form.ipaddress,
+      networkMask: $scope.form.networkMask,
+      defaultGateway: $scope.form.defaultGateway,
+      automaticIp: $scope.form.automaticIp,
       hostname: $scope.form.hostname
     };
 
-    AppService.saveNetworkInfo(networkConfig)
-      .then(function onSuccess(result) {
-        AppService.gatewayIp = result.data.gatewayIp;
-        $state.go('app.reboot');
-      }, function error(err) {
-        alert(err);
-      });
+    AppService.saveNetworkInfo(networkConfig);
+    AppService.gatewayIp = $scope.form.hostname + '.local';
+    $state.go('app.reboot');
   };
 });
 
