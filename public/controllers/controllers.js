@@ -115,6 +115,10 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, $st
 
   $scope.save = function () {
     var networkConfig = {
+      ipaddress: $scope.form.ipaddress,
+      networkMask: $scope.form.networkMask,
+      defaultGateway: $scope.form.defaultGateway,
+      automaticIp: $scope.form.automaticIp,
       hostname: $scope.form.hostname
     };
 

@@ -4,8 +4,8 @@
         <label for="hostname" class="sr-only">Hostname</label>
 
         <input type="text" id="hostname" class="form-control" placeholder="Hostname" ng-model="form.hostname" required>
-        <label><input type="radio" name="rdAutomaticIP" ng-model="form.automaticIp"  ng-value="true" disabled>Obtain an IP address automatically</label>
-        <label><input type="radio" name="rdAutomaticIP" ng-model="form.automaticIp" ng-value="false" disabled>Use the following IP address</label>
+        <label><input type="radio" name="rdAutomaticIP" ng-model="form.automaticIp"  ng-value="true">Obtain an IP address automatically</label>
+        <label><input type="radio" name="rdAutomaticIP" ng-model="form.automaticIp" ng-value="false">Use the following IP address</label>
         <label for="ipaddress" class="sr-only">IP address</label>
         <input type="text" id="ipaddress" class="form-control" placeholder="IP address" ng-model="form.ipaddress" ng-disabled="form.automaticIp" required>
         <label for="networkMask" class="sr-only">Network mask</label>
