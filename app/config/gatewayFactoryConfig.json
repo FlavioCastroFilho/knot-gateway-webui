@@ -9,10 +9,6 @@
     }
   },
   "network": {
-    "automaticIp": true,
-    "ipaddress": null,
-    "defaultGateway": null,
-    "networkMask": null,
     "automaticDns": true,
     "primaryDns": null,
     "secondaryDns": null

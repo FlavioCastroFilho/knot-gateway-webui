@@ -1,6 +1,7 @@
 var router = require('express').Router(); // eslint-disable-line new-cap
 var settings = require('../models/settings');
 var exec = require('child_process').exec;
+var network = require('../models/network');
 var os = require('os');
 
 var get = function get(req, res) {
@@ -60,7 +61,21 @@ var postRestore = function postRestore(req, res) {
     if (err) {
       res.sendStatus(500);
     } else {
-      postReboot(req, res);
+      network.setHostname('knot', function onHostnameSet(errHostname) {
+        var config = {};
+        if (errHostname) {
+          res.sendStatus(500);
+        } else {
+          config.automaticIp = true;
+          network.setIpv4Configuration(config, function onIpv4Set(errIpv4) {
+            if (errIpv4) {
+              res.sendStatus(500);
+            } else {
+              postReboot(req, res);
+            }
+          });
+        }
+      });
     }
   });
 };
