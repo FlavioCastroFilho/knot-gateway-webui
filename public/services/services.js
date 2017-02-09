@@ -133,7 +133,8 @@ app.factory('AppService', function ($http) {
         headers: {
           'Content-Type': 'application/json;charset=utf-8;'
         }
-      }
+      },
+      timeout: 5000
     });
   };
 
@@ -173,7 +174,8 @@ app.factory('AppService', function ($http) {
         headers: {
           'Content-Type': 'application/json;charset=utf-8;'
         }
-      }
+      },
+      timeout: 5000
     });
   };
 

@@ -100,8 +100,14 @@ app.controller('AdminController', function ($rootScope, $scope, $location, $stat
     .then(function onSuccess(result) {
       AppService.gatewayIp = result.data.gatewayIp;
       $state.go('app.reboot');
-    }, function onError() {
-      alert('Failed to restore the gateway');
+    }, function error(err) {
+      // time out code for AngularJS
+      if (err.status === -1) {
+        AppService.gatewayIp = $scope.form.hostname + '.local';
+        $state.go('app.reboot');
+      } else {
+        alert(err);
+      }
     });
   };
 });
@@ -140,6 +146,10 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, $st
 
   $scope.save = function () {
     var networkConfig = {
+      ipaddress: $scope.form.ipaddress,
+      networkMask: $scope.form.networkMask,
+      defaultGateway: $scope.form.defaultGateway,
+      automaticIp: $scope.form.automaticIp,
       hostname: $scope.form.hostname
     };
 
@@ -148,7 +158,13 @@ app.controller('NetworkController', function ($rootScope, $scope, $location, $st
         AppService.gatewayIp = result.data.gatewayIp;
         $state.go('app.reboot');
       }, function error(err) {
-        alert(err);
+        // time out code for AngularJS
+        if (err.status === -1) {
+          AppService.gatewayIp = $scope.form.hostname + '.local';
+          $state.go('app.reboot');
+        } else {
+          alert(err);
+        }
       });
   };
 });
