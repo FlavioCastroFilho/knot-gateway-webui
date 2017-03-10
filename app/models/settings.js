@@ -88,27 +88,6 @@ var setAdministrationSettings = function setAdministrationSettings(settings, don
   writeFile('adm', settings, done);
 };
 
-var getRadioSettings = function getRadioSettings(done) {
-  fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
-    var obj;
-    var radioObj;
-
-    if (err) {
-      done(err);
-    } else {
-      try {
-        obj = JSON.parse(data);
-        radioObj = {
-          mac: obj.radio.mac
-        };
-        done(null, radioObj);
-      } catch (e) {
-        done(e);
-      }
-    }
-  });
-};
-
 var getNetworkSettings = function getNetworkSettings(done) {
   fs.readFile(CONFIGURATION_FILE, 'utf8', function onRead(err, data) {
     var obj;
@@ -163,7 +142,6 @@ var setDefaultSettings = function setDefaultSettings(done) {
 module.exports = {
   getAdministrationSettings: getAdministrationSettings,
   setAdministrationSettings: setAdministrationSettings,
-  getRadioSettings: getRadioSettings,
   getNetworkSettings: getNetworkSettings,
   setNetworkSettings: setNetworkSettings,
   setDefaultSettings: setDefaultSettings

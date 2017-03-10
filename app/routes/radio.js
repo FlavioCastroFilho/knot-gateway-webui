@@ -1,8 +1,8 @@
 var router = require('express').Router(); // eslint-disable-line new-cap
-var settings = require('../models/settings');
+var radio = require('../models/radio');
 
 var get = function get(req, res) {
-  settings.getRadioSettings(function onRadioSettingsReturned(err, radioSettings) {
+  radio.getRadioSettings(function onRadioSettingsReturned(err, radioSettings) {
     if (err) {
       res.sendStatus(500);
     } else {
